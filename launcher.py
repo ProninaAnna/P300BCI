@@ -1,8 +1,11 @@
 import multiprocessing
+import logging
 from eeg import *
 from eyetracker import *
 from visual import *
 from CONSTANTS import*
+
+logging.basicConfig(level=logging.INFO)
 
 if __name__ == '__main__':
     
@@ -22,6 +25,7 @@ if __name__ == '__main__':
         run_photocell.start()
         
     finally:
+        run_photocell.join()
         run_eeg.join()
         run_visual.join()
         run_eyetracking.join()
