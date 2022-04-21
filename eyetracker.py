@@ -45,9 +45,11 @@ class Eyetracker:
         self.res = iViewXAPI.iV_Connect(c_char_p(self.tracker_ip), c_int(4444),
                                         c_char_p(self.main_ip), c_int(5555))
         if self.res == 1:
-            print('Connection established')
+            logging.info('Connection established')
+            # print('Connection established')
         else:
-            print('Connection failed. Error number: {}'.format(self.res))
+            logging.error('Connection failed. Error number: {}'.format(self.res))
+            # print('Connection failed. Error number: {}'.format(self.res))
 
     def calibrate(self):
         """Calibrate the eyetracker."""    
@@ -67,11 +69,16 @@ class Eyetracker:
                                         calibrationSpeed, autoAccept, pointBrightness,
                                         backgroundBrightnress, targetShape, targetSize, targetFile)
         self.res = iViewXAPI.iV_SetupCalibration(byref(calibrationData))
+        # new coordinates for calibration points
+        new_positions= [(840, 525),(280,60), (280, 990), (1400, 60), (1400,990),
+                        (280, 525), (1400, 525), (840, 60), (840, 990)]
+        for i in range(len(new_positions)):
+            self.res=iViewXAPI.iV_ChangeCalibrationPoint(i+1,new_positions[i][0], new_positions[i][1]) 
         self.res = iViewXAPI.iV_Calibrate()
         if self.res == 1:
-            print('Eyetracker calibration started')
+            logging.info('Eyetracker calibration started')
         else:
-            print('Failed to calibrate eyetracker. Error number: {}'.format(self.res))
+            logging.error('Failed to calibrate eyetracker. Error number: {}'.format(self.res))
 
     def validate(self, n=1):
         """Validate the calibration of the eyetracker n times.
@@ -88,15 +95,15 @@ class Eyetracker:
         for i in range(n):
             self.res = iViewXAPI.iV_Validate()
             if self.res == 1:
-                print('Eyetracker validation started {} time'.format(i+1))
+                logging.info('Eyetracker validation started {} time'.format(i+1))
             else:
-                print('Failed to validate eyetracker. Error number: {}'.format(self.res))
+                logging.error('Failed to validate eyetracker. Error number: {}'.format(self.res))
             x,y = self.get_accuracy()  # Get calibration accuracy from eyetracker 
             accuracy_x.append(x)
             accuracy_y.append(y)  
         
-        print('Mean deviation x (deg): {}'.format(np.mean(accuracy_x)))
-        print('Mean deviation y (deg): {}'.format(np.mean(accuracy_y)))
+        logging.info('Mean deviation x (deg): {}'.format(np.mean(accuracy_x)))
+        logging.info('Mean deviation y (deg): {}'.format(np.mean(accuracy_y)))
 
     def get_accuracy(self):
         """Get accuracy data from the eyetracker.
@@ -110,7 +117,7 @@ class Eyetracker:
         if self.res == 1:
             pass
         else:
-            print('Failed to get eyetracker accuracy data. Error number: {}'.format(self.res))
+            logging.error('Failed to get eyetracker accuracy data. Error number: {}'.format(self.res))
         dlx=accuracyData.deviationLX
         dly=accuracyData.deviationLY
         drx=accuracyData.deviationRX
@@ -123,25 +130,25 @@ class Eyetracker:
         """Stop the connection to iViewX on SMI computer."""
         self.res = iViewXAPI.iV_Disconnect()
         if self.res == 1:
-            print("Eyetracker has been disconnected successfully")
+            logging.info("Eyetracker has been disconnected successfully")
         else:
-            print("Disconnection failed. Error number: {}".format(self.res))
+            logging.error("Disconnection failed. Error number: {}".format(self.res))
 
     def start_record(self):
         """Start recording eyetracking data"""
         self.res = iViewXAPI.iV_StartRecording()
         if self.res == 1:
-            print("Eyetracker recording started")
+            logging.info("Eyetracker recording started")
         else:
-            print("Failed to start eyetracker recording. Error number: {}".format(self.res))
+            logging.error("Failed to start eyetracker recording. Error number: {}".format(self.res))
     
     def stop_record(self):
         """Stop recording eyetracking data"""
         self.res = iViewXAPI.iV_StopRecording()
         if self.res == 1:
-            print("Eyetracker recording stopped")
+            logging.info("Eyetracker recording stopped")
         else:
-            print("Failed to stop eyetracker recording. Error number: {}".format(self.res))
+            logging.error("Failed to stop eyetracker recording. Error number: {}".format(self.res))
 
     def send_message(self, message):
         """Send a message with a marker to the eyetracker.
@@ -152,9 +159,9 @@ class Eyetracker:
         """
         self.res = iViewXAPI.iV_SendImageMessage(message)
         if self.res == 1:
-            print("Message to the eyetracker has been sent successfully")
+            logging.info("Message to the eyetracker has been sent successfully")
         else:
-            print("Failed to send message to the eyetracker. Error number: {}".format(self.res))
+            logging.error("Failed to send message to the eyetracker. Error number: {}".format(self.res))
 
     def save_data(self, filename):
         '''Save eyetracking data on the SMI computer
@@ -165,9 +172,9 @@ class Eyetracker:
         '''
         self.res = iViewXAPI.iV_SaveData(filename, 'description', 'user', 0)
         if self.res == 1:
-            print("Eyetracking data saved")
+            logging.info("Eyetracking data saved")
         else:
-            print("Failed save eyetracking data. Error number: {}".format(self.res))
+            logging.error("Failed save eyetracking data. Error number: {}".format(self.res))
 
     def eyetracking_process(self):
         """Main eyetracking process.
@@ -175,9 +182,11 @@ class Eyetracker:
         The process used in the experiment.
 
         """
+        
+
         self.connect()
         self.calibrate()
-        self.validate(3)
+        self.validate(1)
 
         #time.sleep(1)
         #self.send_message('message.jpg')

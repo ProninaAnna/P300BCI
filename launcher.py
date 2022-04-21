@@ -13,7 +13,8 @@ from eyetracker import *
 from visual import *
 from CONSTANTS import*
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format='%(levelname)s	%(processName)s	%(message)s', level=logging.INFO)
+logging.getLogger()
 
 if __name__ == '__main__':
     

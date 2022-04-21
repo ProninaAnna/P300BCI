@@ -6,6 +6,7 @@ in EEG class.
 
 """
 
+import logging
 import multiprocessing
 from pylsl import StreamInlet, resolve_byprop
 from CONSTANTS import *
@@ -25,7 +26,7 @@ class EEG:
     def eeg_process(self):
         """Working with EEG"""
         
-        print("looking for an EEG stream...")
+        logging.info("looking for an EEG stream...")
         streams = resolve_byprop('name', EEG_STREAM)
         inlet = StreamInlet(streams[0])
         # Loop to obtain data from the EEG LSL stream
@@ -37,7 +38,7 @@ class EEG:
     def photocell_process(self):
         """Working with photocell"""
 
-        print("looking for a photosensor stream...")
+        logging.info("looking for a photosensor stream...")
         streams = resolve_byprop('name', PHOTOSENSOR_STREAM)
         inlet = StreamInlet(streams[0])
         # Loop to obtain data from the photocell LSL stream
