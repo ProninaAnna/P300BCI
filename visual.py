@@ -15,54 +15,63 @@ from CONSTANTS import *
 
 class Visual:
     def __init__(self):
-        pass
+        self.monitor = Monitor(MONITOR, currentCalib={'sizePix':SIZE, 'width': WIDTH, 'distance':DISTANCE})
+        self.display = Window(size=SIZE, monitor=self.monitor, units=SCREEN_UNITS, color=BACKCOL, screen=MONITOR_N, fullscr=True)
+        self.mouse = Mouse()
+        self.mode = VIS_MODE
+        self.fixation_mark = Circle(self.display, radius=0.05 ,edges=32, pos=CENTER, lineColor=FIXCOL)
+        self.photosensor_stim = Rect(self.display, size = (5.5,5.5), fillColor = FIXCOL, lineWidth = 0, pos = PHOTOSENSOR_POS)
+        
+    def visual_environment(self):
+        '''
+        '''
+        if self.mode == 'rc':
+            pass
+        elif self.mode == 'spiral':
+            # draw all main stimuli
+            for position in STIM_POS:
+                
+                index = STIM_POS.index(position)
+                group_size = len(STIM_POS)/len(STIM_SIZE)
+                
+                if index+1 < group_size:
+                    # set first available size to first set of stimuli
+                    stim_size = STIM_SIZE[0] 
+                elif group_size <= index+1 < 2*group_size:
+                    stim_size = STIM_SIZE[1]
+                else: 
+                    stim_size = STIM_SIZE[2]
+                    
+                stim = TextStim(self.display, text=STIM_NAMES[index], pos=position, units=SCREEN_UNITS, height=stim_size)
+                stim.draw()
+                
+            # draw other stimuli
+            self.fixation_mark.draw()
+            self.photosensor_stim.draw()
+            
+            self.disp.flip()
+            
+        else:
+            logging.error('Invalid viual mode specified')
 
     def visual_process(self):
+        '''
+        '''
         logging.info("Visual process started")
 
-        monitor = Monitor('Dell') # Monitor('Phillips')
-        monitor.setSizePix(SIZE)
-        monitor.setWidth(WIDTH)
-        monitor.setDistance(DISTANCE)
-        monitor.saveMon()
-
-        disp=Window(size=SIZE, monitor=monitor, units='deg', color=BACKCOL, screen=2, fullscr=True)
-
-        mouse=Mouse()
-        fixmark=Circle(disp, radius=0.05 ,edges=32, pos=CENTER, lineColor=FIXCOL)
-        photosensor_stim = Rect(disp, size = (5.5,5.5), fillColor = 'white', lineWidth = 0, pos = PHOTOSENSOR_POS)
-
         while True:
-            button = mouse.getPressed()
+            
+            button = self.mouse.getPressed()
+            
             if button[0]:
                 break
-
-            for letter in [zip(BLOCK1, C1, LS1), zip(BLOCK2, C2, LS2), zip(BLOCK3, C3, LS3)]:
-                for stimul in letter:
-                    stim = TextStim(disp, text=stimul[0], pos=stimul[1], units='deg', height=stimul[2], opacity=0.4)
-                    stim.draw()
-                
-
-            fixmark.draw()
-            disp.flip()
-        # time.sleep()
-        
-        # for i in range(0,10):
-        #     photosensor_stim.draw()
-        #     disp.flip()
-        #     print int(time.time()), 'FLASH!' 
-        #     time.sleep(0.05)
-        #     disp.flip()
-        #     time.sleep(0.1)
-        
-        
-        time.sleep(2)
-        disp.close()
+            
+            self.visual_environment()
+            
+        self.disp.close()
 
 
 if __name__ == '__main__':
-    #print np.rad2deg(np.arctan(23.75/50))
     a=Visual()
     a.visual_process()
-    pass
    
