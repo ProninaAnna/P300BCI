@@ -17,8 +17,10 @@ DISTANCE = 56 # distance between subject and screen, cm
 VIS_MODE = 'spiral' # can be 'rc' row-column visuals or 'spiral' for spiral visuals
 SCREEN_UNITS = 'deg' # units 
 CENTER = (0,0) # fixation mark coordinates
-PHOTOSENSOR_POS = (25, 14.4) # photosensor stimulus coordinates
-STIM_NAMES = [item for item in u'qwertyuiopasdfghjklzxcvbnm_1234567890!?.,;:"()+=-~[]\/'] # available stimuli names, unicode
+PHOTOSENSOR_POS = (25.5, 14.4) # photosensor stimulus coordinates
+STIM_NAMES = [item for item in u'qwertyuiopasdfghjklzxcvbnm_1234567890!?.,;:"()+=-~[]\/'.upper()] # available stimuli names, unicode
+GROUP1 = [(0, 11, 21), (1, 12, 22), (2, 13, 23), (3, 14, 24), (4, 15, 25), (5, 16, 26), (6, 17, 18), (7, 9, 19), (8, 10, 20)]
+GROUP2 = [(0, 17, 24), (1, 9, 25), (2, 10, 26), (3, 11, 18), (4, 12, 19), (5, 13, 20), (6, 14, 21), (7, 15, 22), (8, 16, 23)]
 STIM_SIZE = ( 5.5, 3.5, 1.5) # stimuli sizes
 STIM_POS = [(0,-12.000), (-7.713,-9.193), (-11.818,-2.084), (-10.392,6.000), (-4.104,11.276),
             (4.104,11.276), (10.392,6.000), (11.818,-2.084), (7.713,-9.193),

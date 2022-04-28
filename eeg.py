@@ -30,7 +30,7 @@ class EEG:
         streams = resolve_byprop('name', EEG_STREAM)
         inlet = StreamInlet(streams[0])
         # Loop to obtain data from the EEG LSL stream
-        for i in range(0, 10):
+        for i in range(1):
             # Request data and timestamp from the EEG stream
             sample, timestamp = inlet.pull_sample()
             print('eeg ', timestamp, sample)
@@ -42,7 +42,7 @@ class EEG:
         streams = resolve_byprop('name', PHOTOSENSOR_STREAM)
         inlet = StreamInlet(streams[0])
         # Loop to obtain data from the photocell LSL stream
-        for i in range(0, 20):
+        for i in range(0, 10):
             # Request data and timestamp from the photocell stream
             sample, timestamp = inlet.pull_sample()
             print('photo ', timestamp, sample)

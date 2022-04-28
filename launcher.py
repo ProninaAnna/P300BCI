@@ -16,28 +16,42 @@ from CONSTANTS import*
 logging.basicConfig(format='%(levelname)s	%(processName)s	%(message)s', level=logging.INFO)
 logging.getLogger()
 
+# Create structures for processes
+
+def visual():
+    Visual_obj = Visual()
+    Visual_obj.visual_process()
+
+def eeg():
+    EEG_obj = EEG()
+    EEG_obj.eeg_process()
+
+def phtotocell():
+    EEG_obj = EEG()
+    EEG_obj.photocell_process()
+
+def eyetracking():
+    Eyetracker_obj = Eyetracker()
+    Eyetracker_obj.eyetracking_process()
+
 if __name__ == '__main__':
     
-    EEG_obj = EEG()
-    Visual_obj = Visual()
-    Eyetracker_obj = Eyetracker()
-
     try:
         
         # Define processes
         
-        run_eyetracking = multiprocessing.Process(name='Eyetracking', 
-                target=Eyetracker_obj.eyetracking_process, args=())
+        # run_eyetracking = multiprocessing.Process(name='Eyetracking', 
+        #         target=eyetracking, args=())
         run_visual = multiprocessing.Process(name='Visuals',
-                target=Visual_obj.visual_process, args=())
+                target=visual, args=())
         run_eeg = multiprocessing.Process(name='EEG', 
-                target=EEG_obj.eeg_process, args=())
+                target=eeg, args=())
         run_photocell =  multiprocessing.Process(name='Photocell', 
-                target=EEG_obj.photocell_process, args=())
+                target=phtotocell, args=())
 
         # Run processes
 
-        run_eyetracking.start()
+        # run_eyetracking.start()
         run_eeg.start()
         run_photocell.start()
         run_visual.start()
@@ -49,4 +63,4 @@ if __name__ == '__main__':
         run_photocell.join()
         run_eeg.join()
         run_visual.join()
-        run_eyetracking.join()
+        # run_eyetracking.join()
