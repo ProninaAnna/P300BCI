@@ -22,6 +22,10 @@ def visual():
     Visual_obj = Visual()
     Visual_obj.visual_process()
 
+def marker():
+    EEG_obj = EEG()
+    EEG_obj.marker_process()
+
 def eeg():
     EEG_obj = EEG()
     EEG_obj.eeg_process()
@@ -44,16 +48,20 @@ if __name__ == '__main__':
         #         target=eyetracking, args=())
         run_visual = multiprocessing.Process(name='Visuals',
                 target=visual, args=())
-        run_eeg = multiprocessing.Process(name='EEG', 
-                target=eeg, args=())
+        # run_eeg = multiprocessing.Process(name='EEG', 
+        #         target=eeg, args=())
         run_photocell =  multiprocessing.Process(name='Photocell', 
                 target=phtotocell, args=())
+        run_marker = multiprocessing.Process(name='Marker',
+                target=marker, args=())
 
         # Run processes
 
         # run_eyetracking.start()
-        run_eeg.start()
+        # run_eeg.start()
         run_photocell.start()
+        
+        run_marker.start()
         run_visual.start()
 
     finally:
@@ -61,6 +69,7 @@ if __name__ == '__main__':
         # End processes
         
         run_photocell.join()
-        run_eeg.join()
+        # run_eeg.join()
         run_visual.join()
+        run_marker.join()
         # run_eyetracking.join()

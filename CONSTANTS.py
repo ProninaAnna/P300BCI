@@ -33,3 +33,8 @@ STIM_GROUPS = [(),(),()]
 BACKCOL=(-1,-1,-1) # background color
 FIXCOL=(1,1,1) # fixation mark color
 STIMCOL=(1,1,1) # stimuli color
+
+
+VISUAL_STREAM_NAME = 'VisualProcessMarkerStream'
+STARTMARKER = 777 # start marker for LSL
+ENDMARKER = 888 # stop marker for LSL

@@ -13,6 +13,7 @@ from psychopy.visual import TextStim
 from psychopy.visual import ImageStim
 from psychopy.event import Mouse
 from psychopy.core import wait
+from pylsl import StreamInfo, StreamOutlet
 from CONSTANTS import *
 
 class Visual:
@@ -23,6 +24,7 @@ class Visual:
         self.mode = VIS_MODE
         self.fixation_mark = Circle(self.display, radius=0.05 ,edges=32, pos=CENTER, lineColor=FIXCOL)
         self.photosensor_stim = Rect(self.display, size = (5.5,5.5), fillColor = FIXCOL, lineWidth = 0, pos = PHOTOSENSOR_POS)
+        self.LSL = self.create_lsl_outlet()
         
     def visual_environment(self, idx=(), state=""):
         '''Draw the visual environment'''
@@ -81,6 +83,13 @@ class Visual:
         self.display.saveMovieFrames(r'F:\\Timofey\\P300BCI-main\\environment.jpg')
         self.display.close()
 
+    def create_lsl_outlet(self):
+        '''Create stream outlet for sending markers'''
+        
+        info = StreamInfo(VISUAL_STREAM_NAME, 'Markers', 1, 0, 'int32', '10106CA9-8564-4400-AB07-FFD2B668B86E')
+        outlet = StreamOutlet(info)
+        return outlet
+
     def visual_process(self):
         '''Run a desirable visual process'''
 
@@ -93,14 +102,18 @@ class Visual:
         #     if button[0]:
         #         break
 
-        time1 = datetime.datetime.now()    
-        
+        # time1 = datetime.datetime.now()    
+        wait(1)
+
+        self.LSL.push_sample([STARTMARKER])
         for i in GROUP1+GROUP2:
             self.visual_stimulation(i)
-
+        self.LSL.push_sample([ENDMARKER])
+        
         self.display.close()
-        time2 = datetime.datetime.now()
-        print  time2 - time1
+        
+        # time2 = datetime.datetime.now()
+        # print  time2 - time1
 
 
 if __name__ == '__main__':
