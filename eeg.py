@@ -10,7 +10,7 @@ import logging
 import multiprocessing
 from pylsl import StreamInlet, resolve_byprop, resolve_stream
 from CONSTANTS import *
-import time    
+import time, os, psutil
 
 class EEG:
     """Tools for working with EEG and photocell.
@@ -23,36 +23,41 @@ class EEG:
     def __init__(self):
         pass
 
+    def create_inlet(self, stream_type):
+        '''Create inlet to read a stream'''
+
+        streams = resolve_byprop('name', stream_type)
+        inlet = StreamInlet(streams[0])
+        return inlet 
+    
+    def write_data(self, filename, inlet):
+        '''Read data from stream and write it to file'''
+        
+        with open(filename, 'w') as f:
+            while True:
+                sample, timestamp = inlet.pull_sample()
+                name = multiprocessing.current_process().name
+                f.write('{}: {} {}\n'.format(name, timestamp, sample))   
+            
     def eeg_process(self):
         """Working with EEG"""
         
         logging.info("looking for an EEG stream...")
-        streams = resolve_byprop('name', EEG_STREAM)
-        inlet = StreamInlet(streams[0])
-        # Loop to obtain data from the EEG LSL stream
-        for i in range(1):
-            # Request data and timestamp from the EEG stream
-            sample, timestamp = inlet.pull_sample()
-            print('eeg ', timestamp, sample)
-
+        inlet = self.create_inlet(EEG_STREAM)
+        self.write_data(r'F:\\Timofey\\test_write_eeg.txt', inlet)
+       
     def marker_process(self):
         """Working with visual process marker stream"""
-        streams = resolve_byprop('name', VISUAL_STREAM_NAME)
-        inlet = StreamInlet(streams[0])
-        # Loop to test visual stream process markers
-        for i in range(2):
-            sample, timestamp = inlet.pull_sample()
-            print('marker', timestamp, sample)
-    
+
+        logging.info("looking for a marker strean")
+        inlet = self.create_inlet(VISUAL_STREAM_NAME)
+        self.write_data(r'F:\\Timofey\\test_write_marker.txt', inlet)
+        
     def photocell_process(self):
         """Working with photocell"""
 
         logging.info("looking for a photosensor stream...")
-        streams = resolve_byprop('name', PHOTOSENSOR_STREAM)
-        inlet = StreamInlet(streams[0])
-        # Loop to obtain data from the photocell LSL stream
-        for i in range(len(GROUP1+GROUP2)):
-            # Request data and timestamp from the photocell stream
-            sample, timestamp = inlet.pull_sample()
-            print('photo ', timestamp, sample)
+        inlet = self.create_inlet(PHOTOSENSOR_STREAM)
+        self.write_data(r'F:\\Timofey\\test_write_photocell.txt', inlet)
+
 

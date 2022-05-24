@@ -55,12 +55,15 @@ class Visual:
                         stim = TextStim(self.display, text=STIM_NAMES[index], pos=position, units=SCREEN_UNITS, height=stim_size, opacity=1)
                         self.photosensor_stim.draw()
                         # stim=ImageStim(self.display, image=r"F:\\Timofey\\P300BCI-main\\24-1.png", pos=position, units=SCREEN_UNITS, size=stim_size)
-
+                    
                 stim.draw()
                 
             # draw other stimuli
             self.fixation_mark.draw()
             
+            # if state=='blink':
+            #     self.LSL.push_sample([index], float(time.time()))
+
             self.display.flip()
             
         else:
@@ -71,6 +74,7 @@ class Visual:
         '''Run blinking stimulation'''
 
         self.visual_environment(idx, state='blink')
+        self.LSL.push_sample([idx[0]], float(time.time()))
         wait(0.05)
         self.visual_environment(idx)
         wait(0.15)
@@ -105,10 +109,13 @@ class Visual:
         # time1 = datetime.datetime.now()    
         wait(1)
 
-        self.LSL.push_sample([STARTMARKER])
+        self.LSL.push_sample([STARTMARKER], float(time.time()))
+
+        # wait(10)
+
         for i in GROUP1+GROUP2:
             self.visual_stimulation(i)
-        self.LSL.push_sample([ENDMARKER])
+        self.LSL.push_sample([ENDMARKER], float(time.time()))
         
         self.display.close()
         
