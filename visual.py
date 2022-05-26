@@ -1,3 +1,4 @@
+from imp import lock_held
 import psychopy.visual 
 import multiprocessing
 import logging
@@ -11,13 +12,13 @@ from psychopy.visual.circle import Circle
 from psychopy.visual.rect import Rect
 from psychopy.visual import TextStim
 from psychopy.visual import ImageStim
-from psychopy.event import Mouse
+from psychopy.event import Mouse, waitKeys
 from psychopy.core import wait
 from pylsl import StreamInfo, StreamOutlet
 from CONSTANTS import *
 
 class Visual:
-    def __init__(self):
+    def __init__(self, queue, pipe_in, pipe_out, lock):
         self.monitor = Monitor(MONITOR, currentCalib={'sizePix':SIZE, 'width': WIDTH, 'distance':DISTANCE})
         self.display = Window(size=SIZE, monitor=self.monitor, units=SCREEN_UNITS, color=BACKCOL, screen=MONITOR_N, fullscr=True)
         self.mouse = Mouse()
@@ -25,6 +26,12 @@ class Visual:
         self.fixation_mark = Circle(self.display, radius=0.05 ,edges=32, pos=CENTER, lineColor=FIXCOL)
         self.photosensor_stim = Rect(self.display, size = (5.5,5.5), fillColor = FIXCOL, lineWidth = 0, pos = PHOTOSENSOR_POS)
         self.LSL = self.create_lsl_outlet()
+        self.lock = lock
+        self.queue = queue
+        self.pipe_in = pipe_in
+        self.pipe_out = pipe_out
+
+        wait(5) # to prevent the psychopy window to open too early
         
     def visual_environment(self, idx=(), state=""):
         '''Draw the visual environment'''
@@ -88,7 +95,13 @@ class Visual:
         self.display.close()
 
     def create_lsl_outlet(self):
-        '''Create stream outlet for sending markers'''
+        '''Create stream outlet for sending markers
+        
+        Keyword arguments:
+        info -- StreamInfo object that contains necessary information about the stream
+        outlet --- StreamOutlet object to stream data samples/chunks 
+
+        '''
         
         info = StreamInfo(VISUAL_STREAM_NAME, 'Markers', 1, 0, 'int32', '10106CA9-8564-4400-AB07-FFD2B668B86E')
         outlet = StreamOutlet(info)
@@ -96,28 +109,36 @@ class Visual:
 
     def visual_process(self):
         '''Run a desirable visual process'''
+        try:
+            self.lock.acquire()
+            logging.info("Visual process locked ")
 
-        logging.info("Visual process started")
+            while self.lock:
+                if self.pipe_out.recv() == int('1'):
+                    self.lock.release() # process unlocked only after the start of other process
+                    break
+                
+            logging.info("Visual process started")
+            waitKeys()
 
-        # while True:
-        # for i in range(9):
-        #     button = self.mouse.getPressed()
+            self.LSL.push_sample([STARTMARKER], float(time.time()))
+
+            # wait(10)
+
+            for i in GROUP1+GROUP2:
+                self.visual_stimulation(i)
+            self.LSL.push_sample([ENDMARKER], float(time.time()))
+
+            self.display.close()
             
-        #     if button[0]:
-        #         break
+            
+            self.queue.put(int(1))
+                
 
-        # time1 = datetime.datetime.now()    
-        wait(1)
+        finally:
+            self.display.close()
 
-        self.LSL.push_sample([STARTMARKER], float(time.time()))
-
-        # wait(10)
-
-        for i in GROUP1+GROUP2:
-            self.visual_stimulation(i)
-        self.LSL.push_sample([ENDMARKER], float(time.time()))
         
-        self.display.close()
         
         # time2 = datetime.datetime.now()
         # print  time2 - time1

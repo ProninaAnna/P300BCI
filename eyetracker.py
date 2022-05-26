@@ -17,7 +17,7 @@ import numpy as np
 import time
 from CONSTANTS import *
 import logging
-
+from pylsl import StreamInlet, resolve_byprop, resolve_stream
 
 class Eyetracker:
     """Tools for working with SMi eyetracker via iViewX API.
@@ -26,7 +26,7 @@ class Eyetracker:
     
     """
 
-    def __init__(self):     
+    def __init__(self, queue, pipe_in, pipe_out):     
         """Initiate Eyetracker class.
         
         Keypord arguments:
@@ -39,9 +39,14 @@ class Eyetracker:
         self.res = None
         self.tracker_ip = IP_IVIEWX
         self.main_ip = IP_STIM
+        self.queue = queue
+        self.pipe_in = pipe_in
+        self.pipe_out = pipe_out
+        self.inlet = self.create_inlet(VISUAL_STREAM_NAME)
 
     def connect(self):
-        """Establish a connection to iViewX on SMI computer."""    
+        """Establish a connection to iViewX on SMI computer."""
+
         self.res = iViewXAPI.iV_Connect(c_char_p(self.tracker_ip), c_int(4444),
                                         c_char_p(self.main_ip), c_int(5555))
         if self.res == 1:
@@ -53,6 +58,7 @@ class Eyetracker:
 
     def calibrate(self):
         """Calibrate the eyetracker."""    
+        
         # Initialize variables
         numberofPoints = 9  # Number of points for calibration
         displayDevice = 1  # 0 - primary, 1- secondary
@@ -60,7 +66,7 @@ class Eyetracker:
         backgroundBrightnress = 0  # Color of background during calibration 
         targetFile = b""  # ???
         calibrationSpeed = 0  # slow
-        autoAccept  = 2  # 0 = manual, 1 = semi-auto, 2 = auto 
+        autoAccept  = 1  # 0 = manual, 1 = semi-auto, 2 = auto 
         targetShape = 1  # 0 = image, 1 = circle1, 2 = circle2, 3 = cross
         targetSize = 20  # Size of calibration points
         WTF = 1  #do not touch -- Unknown parameter
@@ -128,6 +134,7 @@ class Eyetracker:
 
     def disconnect(self):
         """Stop the connection to iViewX on SMI computer."""
+        
         self.res = iViewXAPI.iV_Disconnect()
         if self.res == 1:
             logging.info("Eyetracker has been disconnected successfully")
@@ -136,6 +143,7 @@ class Eyetracker:
 
     def start_record(self):
         """Start recording eyetracking data"""
+        
         self.res = iViewXAPI.iV_StartRecording()
         if self.res == 1:
             logging.info("Eyetracker recording started")
@@ -144,6 +152,7 @@ class Eyetracker:
     
     def stop_record(self):
         """Stop recording eyetracking data"""
+        
         self.res = iViewXAPI.iV_StopRecording()
         if self.res == 1:
             logging.info("Eyetracker recording stopped")
@@ -157,9 +166,11 @@ class Eyetracker:
         message -- string with a message, should have .jpg extencion (?)
 
         """
+        
         self.res = iViewXAPI.iV_SendImageMessage(message)
         if self.res == 1:
-            logging.info("Message to the eyetracker has been sent successfully")
+            # logging.info("Message to the eyetracker has been sent successfully")
+            pass
         else:
             logging.error("Failed to send message to the eyetracker. Error number: {}".format(self.res))
 
@@ -170,11 +181,26 @@ class Eyetracker:
         filename -- string with the name for the file
 
         '''
+        
         self.res = iViewXAPI.iV_SaveData(filename, 'description', 'user', 0)
         if self.res == 1:
             logging.info("Eyetracking data saved")
         else:
             logging.error("Failed save eyetracking data. Error number: {}".format(self.res))
+
+    def create_inlet(self, stream_type):
+        '''Create inlet to read a stream
+        
+        Keyword arguments:
+        stream_type -- name of a stream to read (see CONSTANTS)
+        streams -- all streams in the environment corresponds to demand
+        inlet -- StreamInlet object to listen to particular stream
+
+        '''
+
+        streams = resolve_byprop('name', stream_type)
+        inlet = StreamInlet(streams[0])
+        return inlet 
 
     def eyetracking_process(self):
         """Main eyetracking process.
@@ -182,20 +208,26 @@ class Eyetracker:
         The process used in the experiment.
 
         """
-        
+        try:
+            logging.info("Eyetraking process started")
 
-        self.connect()
-        self.calibrate()
-        self.validate(1)
+            self.connect()
+            self.calibrate()
+            self.validate(1)
 
-        #time.sleep(1)
-        #self.send_message('message.jpg')
-        #time.sleep(1)
-
-        #self.stop_record()
-        #self.save_data('eye_data')
-        self.disconnect()
-
+            self.start_record()
+            self.pipe_in.send(int(1))
+            while self.queue.empty():
+                sample, timestamp = self.inlet.pull_sample(timeout=5 )
+                if sample != None:
+                    self.send_message('{}, {}.jgp'.format(sample, timestamp))
+                 
+            
+            self.stop_record()
+            self.save_data('eye_data')
+            self.disconnect()
+        finally:
+            pass
 
 if __name__ == '__main__':
         RED = Eyetracker()
