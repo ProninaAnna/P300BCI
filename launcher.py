@@ -1,65 +1,92 @@
-"""
+'''
 Run the experiment.
 
 Subsequently launches distinct processes for eyetracking, visual stimuli
-demonstration, EEG and photocell recording.
+demonstration, EEG, photocell ans marker recording.
 
-"""
-
+'''
 import multiprocessing
 import logging
-from eeg import *
-from eyetracker import *
-from visual import *
-from CONSTANTS import*
-import time
+from eeg import EEG
+from eyetracker import Eyetracker
+from visual import Visual
+from CONSTANTS import *
 
-logging.basicConfig(format='%(levelname)s	%(processName)s	%(message)s', level=logging.INFO)
+# Setup logger to print ordered messages in terminal
+logging.basicConfig(format='%(levelname)s	%(processName)s	%(message)s',
+                    level=logging.INFO)
 logging.getLogger()
 
 # Create structures for processes
-
 def visual(queue, pipe_in, pipe_out, lock):
+    '''Define what Visual process (see below) should run.'''
+    
     Visual_obj = Visual(queue, pipe_in, pipe_out, lock)
     Visual_obj.visual_process()
 
 def marker(queue):
+    '''Define what Marker process (see below) should run.'''
+    
     EEG_obj = EEG(queue)
     EEG_obj.marker_process()
 
 def eeg(queue):
+    '''Define what EEG process (see below) should run.'''
+    
     EEG_obj = EEG(queue)
     EEG_obj.eeg_process()
 
 def phtotocell(queue):
+    '''Define what Photocell process (see below) should run.'''
+    
     EEG_obj = EEG(queue)
     EEG_obj.photocell_process()
 
 def eyetracking(queue, pipe_in, pipe_out):
+    '''Define what Eyetracking process (see below) should run'''
+    
     Eyetracker_obj = Eyetracker(queue, pipe_in, pipe_out)
     Eyetracker_obj.eyetracking_process()
+
+def get_communication_tools():
+    '''Create tools to exchange information between processes.
+    
+    Returns:
+    queue -- Queue object to put data in and get it (used to
+             send and detect the end mark to stop all processes)
+    pipe_in -- Pipe object to send messages (used to send a mark
+               and unlock Visual process)
+    pipe_out -- Pipe object to recieve messages (used to receive a 
+                mark and unlock Visual process)
+    lock -- Lock object to make one process wait until another 
+            unlock it (used to make Visual process wait Eyetracking)
+    
+    '''
+    queue = multiprocessing.Queue()
+    pipe_in, pipe_out = multiprocessing.Pipe()
+    lock = multiprocessing.Lock()
+    return(queue, pipe_in, pipe_out, lock)
+
 
 if __name__ == '__main__':
     
     try:
-        queue = multiprocessing.Queue() # can have multiple endpoints
-        pipe_in, pipe_out = multiprocessing.Pipe() #duplex=False) # only have 2 endpoints, 3 times faster than queue
-        lock = multiprocessing.Lock()
-        # Define processes
+        # Get tools to communicate between processes
+        queue, pipe_in, pipe_out, lock = get_communication_tools()
         
+        # Define processes
         run_eyetracking = multiprocessing.Process(name='Eyetracking', 
                 target=eyetracking, args=(queue, pipe_in, pipe_out))
-        run_visual = multiprocessing.Process(name='Visuals',
-                target=visual, args=(queue, pipe_in, pipe_out, lock,))
         run_eeg = multiprocessing.Process(name='EEG', 
                 target=eeg, args=(queue,))
         run_photocell =  multiprocessing.Process(name='Photocell', 
                 target=phtotocell, args=(queue,))
         run_marker = multiprocessing.Process(name='Marker',
                 target=marker, args=(queue,))
+        run_visual = multiprocessing.Process(name='Visual',     # NOTE old was: name='Visuals' if something goes wrong 
+        target=visual, args=(queue, pipe_in, pipe_out, lock,))
 
         # Run processes
-
         run_eyetracking.start()
         run_eeg.start()
         run_photocell.start()
@@ -69,15 +96,8 @@ if __name__ == '__main__':
     finally:
         
         # End processes
-        
-        run_photocell.join()
-        run_eeg.join()
-        run_visual.join()
-        run_marker.join()
         run_eyetracking.join()
-
-    # run_visual.terminate()
-    # run_eyetracking.terminate()
-    # run_eeg.terminate()
-    # run_photocell.terminate()
-    # run_marker.terminate()
+        run_eeg.join()
+        run_photocell.join()
+        run_marker.join()
+        run_visual.join()
