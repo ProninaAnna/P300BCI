@@ -78,7 +78,7 @@ class EEG:
         '''Working with visual process marker stream.'''
 
         logging.info('looking for a marker stream')
-        inlet = self.create_inlet(VISUAL_STREAM_NAME)
+        inlet = self.create_inlet(VISUAL_STREAM)
         self.write_data(r'F:\\Timofey\\test_write_marker.txt', inlet)
         print('marker process ended')
         
