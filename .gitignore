@@ -1,0 +1,7 @@
+application/cache
+CONSTANTS.pyc
+eeg.pyc
+eyetracker.pyc
+iViewXAPI.pyc
+launcher.pyc
+visual.pyc
