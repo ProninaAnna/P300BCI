@@ -51,7 +51,7 @@ class Eyetracker:
         self.queue = queue
         self.pipe_in = pipe_in
         self.pipe_out = pipe_out
-        self.inlet = self.create_inlet(VISUAL_STREAM_NAME)
+        self.inlet = self.create_inlet(VISUAL_STREAM)
         self.codes = {
             1:"SUCCES: intended functionality has been fulfilled",
             2:"NO_VALID_DATA: no new data available",

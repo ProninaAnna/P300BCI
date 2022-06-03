@@ -2,11 +2,15 @@
 List of available constants to setup and customize P300 BCI
 '''
 
+import os
+
 EEG_STREAM = 'NVX52_Data' # name of the EEG data stream 
 PHOTOSENSOR_STREAM = 'NVX52_Events' # name of the photosensor data stream
 VISUAL_STREAM = 'VisualProcessMarkerStream'
 TRIAL_START = 777 # start marker for LSL
 TRIAL_END= 888 # stop marker for LSL
+WORD_START=444
+WORD_END=555
 
 IP_IVIEWX = '192.168.2.43' # static IP of the iViewX laptop
 IP_STIM = '192.168.2.173' # static IP of the stimulus PC
@@ -36,10 +40,13 @@ STIM_POS = [(0,-12.000), (-7.713,-9.193), (-11.818,-2.084),
 
 FLASH = 0.025 # flashing time, s
 ISI = 0.075 # inter stimulus interval, s
-TRIAL_LEN = 2 # number of flashes in one trial
+TRIAL_LEN = 10 # number of flashes in one trial
 
 BACKCOL=(-1,-1,-1) # background color
 FIXCOL=(1,1,1) # fixation mark color
 STIMCOL=(1,1,1) # stimuli color
 QUECOL=(1.0,-1,-1) # que color
 
+FILEPATH = os.path.dirname(os.path.realpath(__file__))+'\\logs'
+if not os.path.exists(FILEPATH):
+    os.mkdir(FILEPATH)

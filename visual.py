@@ -2,6 +2,7 @@ import multiprocessing
 import logging
 import time
 import numpy as np
+import random
 #import psychopy.visual # ?
 from psychopy.monitors import Monitor
 from psychopy.visual import Window
@@ -66,8 +67,14 @@ class Visual:
 
 
     def visual_environment(self, flash_group=(), state=""):
-        '''Draw the visual environment'''
+        '''Draw the visual environment
+        
+        Keyword arguments:
+        flash group -- tuple with coordinates of stimuli
+        state -- string with the mode of visual environment
+                 can be 'flash', 'que'...
 
+        '''
         # Loop over all stimuli positions
         for position in STIM_POS:
 
@@ -91,6 +98,7 @@ class Visual:
                     stim = TextStim(self.display, text=STIM_NAMES[index], pos=position, units=SCREEN_UNITS, height=stim_size, opacity=1)
                     self.photosensor_stim.draw()
 
+            # Mark target stimulus
             if state == 'que':
                 if index == flash_group:
                     stim = TextStim(self.display, text=STIM_NAMES[index], pos=position, units=SCREEN_UNITS, height=stim_size, opacity=1, color=QUECOL)
@@ -104,8 +112,13 @@ class Visual:
         
 
     def visual_stimulation(self, flash_group, group_number):
-        '''Run stimulation'''
+        '''Run stimulation
+        
+        Keyword arguments:
+        flash_group -- tuple with coordinates of stimuli
+        group_number -- key of group in groups dicts (see CONSTANTS)
 
+        '''
         self.visual_environment(flash_group = flash_group, state='flash')
         self.LSL.push_sample([group_number], float(time.time()))
         wait(FLASH)
@@ -132,22 +145,23 @@ class Visual:
         self.display.close()
 
 
-    def visual_process(self, sequence='', lockable = True):
+    def visual_process(self, sequence=[], lockable = True):
         '''
         Run visual process.
         Arguments:
         
         sequence -- list of lists or similar containers with indeces of target stimuli
+
         '''
-        np.random.seed=42
         groups=merge_two_dicts(GROUP1, GROUP2) # make stimulus groups dict
-        order=np.random.shuffle([i for i in range(len(groups))]) # generate random order of flashse
+        order=[i for i in range(len(groups))] # generate random order of flashes
+        
         try:
             
             # Lock Visual process if necessary 
             if lockable:
                 self.lock.acquire()
-                logging.info("Visual process locked ")
+                logging.info("Visual process locked")
 
                 while self.lock:
                     if self.pipe_out.recv() == int('1'):
@@ -155,22 +169,27 @@ class Visual:
                         break
                 
             logging.info("Visual process started")
-
+            self.visual_environment()
+            
             waitKeys() # pressing any key starts the stimulation
 
             # loop over all target words 
-            for word in ['BCI']:
+            for word in sequence:
+                self.LSL.push_sample([WORD_START], float(time.time()))
                 # loop over all target letters
                 for letter in word:
+                    logging.info('Letter {} in word {}'.format(letter, word))
                     # Show target stimulus
                     self.show_target(letter)
                     # loop over random flashes
                     self.LSL.push_sample([TRIAL_START], float(time.time()))
                     for i in range(TRIAL_LEN):
+                        random.shuffle(order)
                         for j in order:
                             self.visual_stimulation(groups[j], j)
                     self.LSL.push_sample([TRIAL_END], float(time.time()))
-
+                self.LSL.push_sample([WORD_END], float(time.time()))
+                waitKeys() # Wait key press before going to next word
             self.display.close()
             
             self.queue.put(int(1))
@@ -186,4 +205,4 @@ if __name__ == '__main__':
     pipe_in, pipe_out = multiprocessing.Pipe()
     lock = multiprocessing.Lock()
     a=Visual(queue, pipe_in, pipe_out, lock)
-    a.visual_process(lockable = False)
+    a.visual_process(sequence=['B'], lockable = False)

@@ -65,30 +65,30 @@ class EEG:
                 sample, timestamp = inlet.pull_sample(timeout=5)
                 if sample != None:
                     f.write('{}: {} {}\n'.format(name, timestamp, sample))
-                             
+    
     def eeg_process(self, filename=''):
         '''Working with EEG.'''
         
         logging.info('looking for an EEG stream...')
         inlet = self.create_inlet(EEG_STREAM)
-        self.write_data(r'F:\\Timofey\\test_write_eeg.txt', inlet)
-        print('eeg process ended')
+        self.write_data(os.path.join(FILEPATH, 'test_eeg.txt'), inlet)
+        logging.info('eeg process ended')
        
     def marker_process(self, filename=''):
         '''Working with visual process marker stream.'''
 
         logging.info('looking for a marker stream')
         inlet = self.create_inlet(VISUAL_STREAM)
-        self.write_data(r'F:\\Timofey\\test_write_marker.txt', inlet)
-        print('marker process ended')
+        self.write_data(os.path.join(FILEPATH, 'test_marker.txt'), inlet)
+        logging.info('marker process ended')
         
     def photocell_process(self, filename=''):
         '''Working with photocell.'''
 
         logging.info('looking for a photosensor stream...')
         inlet = self.create_inlet(PHOTOSENSOR_STREAM)
-        self.write_data(r'F:\\Timofey\\test_write_photocell.txt', inlet)
-        print('photocell process ended')
+        self.write_data(os.path.join(FILEPATH, 'test_photocell.txt'), inlet)
+        logging.info('photocell process ended')
 
 if __name__ == '__main__':
     # test timing
