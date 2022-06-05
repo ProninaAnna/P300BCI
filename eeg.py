@@ -57,8 +57,14 @@ class EEG:
         Variables:
         sample -- sample of data obtained from the stream
         timestamp -- timecode in Unix Time format (seconds since epoch)
+        path -- directory of particular filecode FILEPATH/FILECODE
 
         '''
+        # Check for directory, create if it doesn`t exist
+        path = os.path.join(FILEPATH, FILECODE)
+        if not os.path.exists(path):
+            os.mkdir(path)
+        # Record data    
         with open(filename, 'w') as f:
             name = multiprocessing.current_process().name
             while self.queue.empty(): 
@@ -71,7 +77,7 @@ class EEG:
         
         logging.info('looking for an EEG stream...')
         inlet = self.create_inlet(EEG_STREAM)
-        self.write_data(os.path.join(FILEPATH, 'test_eeg.txt'), inlet)
+        self.write_data(os.path.join(FILEPATH, FILECODE+'_eeg.txt'), inlet)
         logging.info('eeg process ended')
        
     def marker_process(self, filename=''):
@@ -79,7 +85,7 @@ class EEG:
 
         logging.info('looking for a marker stream')
         inlet = self.create_inlet(VISUAL_STREAM)
-        self.write_data(os.path.join(FILEPATH, 'test_marker.txt'), inlet)
+        self.write_data(os.path.join(FILEPATH, FILECODE+'_marker.txt'), inlet)
         logging.info('marker process ended')
         
     def photocell_process(self, filename=''):
@@ -87,23 +93,12 @@ class EEG:
 
         logging.info('looking for a photosensor stream...')
         inlet = self.create_inlet(PHOTOSENSOR_STREAM)
-        self.write_data(os.path.join(FILEPATH, 'test_photocell.txt'), inlet)
+        self.write_data(os.path.join(FILEPATH, FILECODE+'_photocell.txt'), inlet)
         logging.info('photocell process ended')
 
 if __name__ == '__main__':
-    # test timing
-    streams = resolve_byprop('name', EEG_STREAM)
-    inlet = StreamInlet(streams[0])
-    with open(r'F:\\Timofey\\test_write_eeg_timing.txt', 'w') as f:
-        t1 = float(time.time())
-        data = []
-        while (float(time.time())-t1) <= 2: 
-            # sample, timestamp = inlet.pull_chunk()
-            sample, timestamp = inlet.pull_sample()
-            if timestamp:
-                f.write('{} {}\n'.format(timestamp, sample))
-                data.append(timestamp)
-        print(len(data))
+    # For testing stuff
+   pass
 
             
 

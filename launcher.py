@@ -83,7 +83,7 @@ if __name__ == '__main__':
                 target=phtotocell, args=(queue,))
         run_marker = multiprocessing.Process(name='Marker',
                 target=marker, args=(queue,))
-        run_visual = multiprocessing.Process(name='Visual',     # NOTE old was: name='Visuals' if something goes wrong 
+        run_visual = multiprocessing.Process(name='Visual', 
         target=visual, args=(queue, pipe_in, pipe_out, lock,))
 
         # Run processes
