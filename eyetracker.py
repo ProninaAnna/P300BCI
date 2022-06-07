@@ -132,7 +132,7 @@ class Eyetracker:
         else:
             logging.error(self.errorstring(self.res))
 
-    def validate(self, n=1):
+    def validate(self, n=3):
         '''Validate the calibration of the eyetracker n times.
 
         Keyword arguments:
@@ -298,7 +298,7 @@ class Eyetracker:
         finally:
             pass
 
-        # self.pipe_in.send(int(1)) # If need to skip eyetracking and just record eeg
+        self.pipe_in.send(int(1)) # If need to skip eyetracking and just record eeg
     
         
 if __name__ == '__main__':

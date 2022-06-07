@@ -65,8 +65,9 @@ class EEG:
         if not os.path.exists(path):
             os.mkdir(path)
         # Record data    
+        
         with open(filename, 'w') as f:
-            while self.queue.empty(): 
+            while self.queue.empty():     
                 sample, timestamp = inlet.pull_sample(timeout=5)
                 if sample != None:
                     f.write('{} {}\n'.format(timestamp, sample))

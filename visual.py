@@ -171,7 +171,7 @@ class Visual:
 
         '''
         wait(1)
-        self.visual_environment(STIM_NAMES.index(letter), state='que')
+        self.visual_environment(STIM_NAMES.index(letter.upper()), state='que')
         wait(2)
 
     def take_screenshot(self, filepath):
@@ -182,17 +182,34 @@ class Visual:
         self.display.saveMovieFrames(filepath)
         self.display.close()
 
-    def create_sequence(self):
+    def create_sequence(self, seed=None):
         '''Create sequence of words to be used in the experiment.
         
         Returns:
         sequence -- list of words
         
         '''
-        # TODO
-        sequence = ['B'] # Temporary solution
-        return(sequence)
-    
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '5_letter_words.txt')
+        with open(filename, 'r') as f:
+            lines=f.readlines()
+        words=[]
+        for line in lines:
+            words.extend(line.split())
+        list_of_words=[]
+        for word in words:
+            list_of_words.append(word)
+
+        if seed:
+            random.seed(seed)            
+        sequence=random.sample(list_of_words, 4)
+
+        target_file = os.path.join(FILEPATH, FILECODE, FILECODE+'_aims.txt')
+
+        with open(target_file, 'w') as f:
+             f.write(str(sequence))
+
+        return sequence
+        
     def pause(self):
         '''Pause the stimulation.'''
         

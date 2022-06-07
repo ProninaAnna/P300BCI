@@ -54,4 +54,4 @@ FILEPATH = os.path.dirname(os.path.realpath(__file__))+'\\logs'
 if not os.path.exists(FILEPATH):
     os.mkdir(FILEPATH)
     
-FILECODE = 'Code' # Code of test subject
+FILECODE = 'tp_o' # Code of test subject
