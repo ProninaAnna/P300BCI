@@ -66,18 +66,17 @@ class EEG:
             os.mkdir(path)
         # Record data    
         with open(filename, 'w') as f:
-            name = multiprocessing.current_process().name
             while self.queue.empty(): 
                 sample, timestamp = inlet.pull_sample(timeout=5)
                 if sample != None:
-                    f.write('{}: {} {}\n'.format(name, timestamp, sample))
+                    f.write('{} {}\n'.format(timestamp, sample))
     
     def eeg_process(self, filename=''):
         '''Working with EEG.'''
         
         logging.info('looking for an EEG stream...')
         inlet = self.create_inlet(EEG_STREAM)
-        self.write_data(os.path.join(FILEPATH, FILECODE+'_eeg.txt'), inlet)
+        self.write_data(os.path.join(FILEPATH, FILECODE, FILECODE+'_eeg.txt'), inlet)
         logging.info('eeg process ended')
        
     def marker_process(self, filename=''):
@@ -85,7 +84,7 @@ class EEG:
 
         logging.info('looking for a marker stream')
         inlet = self.create_inlet(VISUAL_STREAM)
-        self.write_data(os.path.join(FILEPATH, FILECODE+'_marker.txt'), inlet)
+        self.write_data(os.path.join(FILEPATH, FILECODE, FILECODE+'_marker.txt'), inlet)
         logging.info('marker process ended')
         
     def photocell_process(self, filename=''):
@@ -93,7 +92,7 @@ class EEG:
 
         logging.info('looking for a photosensor stream...')
         inlet = self.create_inlet(PHOTOSENSOR_STREAM)
-        self.write_data(os.path.join(FILEPATH, FILECODE+'_photocell.txt'), inlet)
+        self.write_data(os.path.join(FILEPATH, FILECODE, FILECODE+'_photocell.txt'), inlet)
         logging.info('photocell process ended')
 
 if __name__ == '__main__':

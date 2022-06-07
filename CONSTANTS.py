@@ -18,7 +18,7 @@ IP_IVIEWX = '192.168.2.43' # static IP of the iViewX laptop
 IP_STIM = '192.168.2.173' # static IP of the stimulus PC
 
 MONITOR = 'Dell' # monitor name
-MONITOR_N = 1
+MONITOR_N = 2
 SIZE = (1680,1050) # screen resolution (2560, 1440), px 
 WIDTH = 47.5 # monitor screen width, 59.5 cm 
 DISTANCE = 56 # distance between subject and screen, cm 
@@ -26,7 +26,7 @@ DISTANCE = 56 # distance between subject and screen, cm
 SCREEN_UNITS = 'deg' # coordinates units 
 CENTER = (0,0) # fixation mark coordinates
 PHOTOSENSOR_POS = (25.5, 14.4) # photosensor stimulus coordinates
-PAUSE_POS = (-25.5, 14.4) # pause mark coordinates
+PAUSE_POS = (-20.0, 14.4) # pause mark coordinates
 STIM_NAMES = [item for item in u'qwertyuiopasdfghjklzxcvbnm_1234567890!?.,;:"()+=-~[]\/'.upper()] # available stimuli names, unicode
 GROUP1 = {0:(0, 11, 21), 1:(1, 12, 22), 2:(2, 13, 23), 3:(3, 14, 24), 4:(4, 15, 25), 5:(5, 16, 26), 6:(6, 17, 18), 7:(7, 9, 19), 8:(8, 10, 20)} # groups of stims ("rows and colums")
 GROUP2 = {9:(0, 17, 24), 10:(1, 9, 25), 11:(2, 10, 26), 12:(3, 11, 18), 13:(4, 12, 19), 14:(5, 13, 20), 15:(6, 14, 21), 16:(7, 15, 22), 17:(8, 16, 23)}

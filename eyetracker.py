@@ -297,6 +297,8 @@ class Eyetracker:
             self.disconnect()
         finally:
             pass
+
+        # self.pipe_in.send(int(1)) # If need to skip eyetracking and just record eeg
     
         
 if __name__ == '__main__':

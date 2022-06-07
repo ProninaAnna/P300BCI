@@ -84,7 +84,7 @@ if __name__ == '__main__':
         run_marker = multiprocessing.Process(name='Marker',
                 target=marker, args=(queue,))
         run_visual = multiprocessing.Process(name='Visual', 
-        target=visual, args=(queue, pipe_in, pipe_out, lock,))
+                target=visual, args=(queue, pipe_in, pipe_out, lock,))
 
         # Run processes
         run_eyetracking.start()

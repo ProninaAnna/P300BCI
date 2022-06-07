@@ -10,7 +10,7 @@ from psychopy.visual.circle import Circle
 from psychopy.visual.rect import Rect
 from psychopy.visual import TextStim
 #from psychopy.visual import ImageStim # probably not needed anymore
-from psychopy.event import Mouse, waitKeys, getKeys
+from psychopy.event import Mouse, waitKeys, getKeys, clearEvents
 from psychopy.core import wait
 from pylsl import StreamInfo, StreamOutlet
 from CONSTANTS import *
@@ -190,7 +190,7 @@ class Visual:
         
         '''
         # TODO
-        sequence = ['BCI'] # Temporary solution
+        sequence = ['B'] # Temporary solution
         return(sequence)
     
     def pause(self):
@@ -202,7 +202,8 @@ class Visual:
         # Draw pause screen
         self.visual_environment(state='pause')
         # Wait until user release pause
-        waitKeys(maxWait=30, keyList=['space'], clearEvents=True)
+        waitKeys(maxWait=30, keyList=['space'])
+        clearEvents()
         # Track pause end in logging and send marker
         logging.info('Continue stimulation...')
         self.LSL.push_sample([PAUSE_END], float(time.time()))
