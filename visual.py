@@ -3,13 +3,13 @@ import logging
 import time
 import numpy as np
 import random
-#import psychopy.visual # ?
+# import psychopy.visual
 from psychopy.monitors import Monitor
 from psychopy.visual import Window
 from psychopy.visual.circle import Circle
 from psychopy.visual.rect import Rect
 from psychopy.visual import TextStim
-#from psychopy.visual import ImageStim # probably not needed anymore
+# from psychopy.visual import ImageStim # probably not needed anymore
 from psychopy.event import Mouse, waitKeys, getKeys, clearEvents
 from psychopy.core import wait
 from pylsl import StreamInfo, StreamOutlet
@@ -30,17 +30,20 @@ class Visual:
     stimulation purposes, between-process communication and lsl streaming.
 
     Attributes:
+        mode -- which visual environment should be used, can be 'spiral'
+                or 'sqare'
+        screen_units -- which screen units need to be used to create a
+                        visual environment, can be 'pix' or 'deg'
         monitor -- instance of psychopy Monitor object
-            setting up monitor for stimulation 
+                   setting up monitor for stimulation 
         display -- instance of psychopy Window object
-            setting up psychopy stimulation window 
+                   setting up psychopy stimulation window 
         mouse -- instance of psychopy Mouse object
         fixation_mark -- instance of psychopy Monitor object
         photosensor_stim -- instance of psychopy Circle object
         lsl -- instance of lsl Stream outlet object
         lock, queue, pipe_in, pipe_out -- instances of multiprocessing objects
-        groups -- groups of stimuli to flash simultaniously, based on
-                  GROUP1 and GROUP2 (see CONSTANTS)
+        groups -- groups of stimuli to flash simultaniously
 
     Methods:
         visual_environment:
@@ -49,31 +52,53 @@ class Visual:
         visual_process:
     '''
     def __init__(self, queue, pipe_in, pipe_out, lock, mode='spiral'):
+        '''Initialize Visual class.
+        
+        Keyword arguments:
+        queue -- Queue object to put data in and get it (used to
+                 send and detect the end mark to stop all processes)
+        pipe_in -- Pipe object to send messages (used to send a mark
+                   and unlock Visual process)
+        pipe_out -- Pipe object to recieve messages (used to receive a 
+                    mark and unlock Visual process)
+        lock -- Lock object to lock the process until another process
+                unlocks it
+        mode -- which visual environment should be used, can be 'spiral'
+                or 'sqare' 
+        
+        '''
         self.mode = mode
-        self.monitor = Monitor(MONITOR, currentCalib={'sizePix':SIZE,
+        self.screen_units = SCREEN_UNITS[self.mode]
+        self.stim_pos = STIM_POS[self.mode]
+        self.monitor = Monitor(MONITOR, currentCalib={'sizePix': SIZE,
                                                       'width': WIDTH,
-                                                      'distance':DISTANCE})
-        self.display = Window(size=SIZE, monitor=self.monitor, units=SCREEN_UNITS[self.mode],
+                                                      'distance': DISTANCE})
+        self.display = Window(size=SIZE, monitor=self.monitor, units=self.screen_units,
                               color=BACKCOL, screen=MONITOR_N, fullscr=True)
         self.mouse = Mouse()
         self.fixation_mark = Circle(self.display, radius=0.05 ,edges=32,
                                     pos=CENTER, lineColor=FIXCOL)
-        self.photosensor_stim = Rect(self.display, size = (5.5,5.5), fillColor = FIXCOL, # TODO: size for square mode
-                                     lineWidth = 0, pos = PHOTOSENSOR_POS[self.mode])
+        self.photosensor_stim = Rect(self.display, size = (5.5,5.5), fillColor = FIXCOL,
+                                     lineWidth = 0, pos = PHOTOSENSOR_POS[self.mode]) # TODO: size for square mode
         self.pause_mark = TextStim(self.display, text='PAUSE', pos=PAUSE_POS,
-                                   units=SCREEN_UNITS[self.mode], height=STIM_SIZE[1])
+                                   units=self.screen_units, height=STIM_SIZE[1]) # TODO: height and pos for square mode
         self.LSL = self.create_lsl_outlet()
         self.lock = lock
         self.queue = queue
         self.pipe_in = pipe_in
         self.pipe_out = pipe_out
+        self.get_groups() # create groups attribute
+
+        wait(5) # Preventing the psychopy window from opening too early
+
+    def get_groups(self):
+        '''Create dictionary with groups of stimuli.'''
+        
         if self.mode == 'spiral':
             self.groups = merge_two_dicts(GROUP1, GROUP2)
         else:
             self.groups = merge_two_dicts(ROWS, COLS)
-
-        wait(5) # Preventing the psychopy window from opening too early
-
+    
     def create_lsl_outlet(self):
         '''Create stream outlet for sending markers.
         
@@ -98,27 +123,27 @@ class Visual:
 
         '''
         # Loop over all stimuli positions
-        for position in STIM_POS[self.mode]:
+        for position in self.stim_pos:
 
             # Extracting indeces and proper size for each stimulus 
             index, stim_size = self.get_stim_size(position)
 
             # Draw stimulus
             stim = TextStim(self.display, text=STIM_NAMES[index], pos=position,
-                            units=SCREEN_UNITS[self.mode], height=stim_size, opacity=0.5)
+                            units=self.screen_units, height=stim_size, opacity=0.5)
             
             # Make target stimuli flash
             if state == 'flash':
                 if index in flash_group:
                     stim = TextStim(self.display, text=STIM_NAMES[index], pos=position,
-                                    units=SCREEN_UNITS[self.mode], height=stim_size, opacity=1)
+                                    units=self.screen_units, height=stim_size, opacity=1)
                     self.photosensor_stim.draw()
 
             # Mark target stimulus
             if state == 'que':
                 if index == flash_group:
                     stim = TextStim(self.display, text=STIM_NAMES[index], pos=position,
-                                    units=SCREEN_UNITS[self.mode], height=stim_size, opacity=1, color=QUECOL)
+                                    units=self.screen_units, height=stim_size, opacity=1, color=QUECOL)
             
             stim.draw()
             
@@ -142,9 +167,9 @@ class Visual:
         index -- index of a stimulus in STIM_NAMES (see CONSTANTS) 
         
         '''
-        index = STIM_POS[self.mode].index(position)
+        index = self.stim_pos.index(position)
         if self.mode == 'spiral':
-            group_size = len(STIM_POS[self.mode])/len(STIM_SIZE)
+            group_size = len(self.stim_pos)/len(STIM_SIZE)
 
             if index+1 <= group_size:
                 stim_size = STIM_SIZE[0] 

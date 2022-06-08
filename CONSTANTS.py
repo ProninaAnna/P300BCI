@@ -19,7 +19,7 @@ IP_STIM = '192.168.2.173' # static IP of the stimulus PC
 
 MONITOR = 'Dell' # monitor name
 MONITOR_N = 2
-SIZE = (1680,1050) # screen resolution (2560, 1440), px 
+SIZE = (1680, 1050) # screen resolution (2560, 1440), px 
 WIDTH = 47.5 # monitor screen width, 59.5 cm 
 DISTANCE = 56 # distance between subject and screen, cm 
 
