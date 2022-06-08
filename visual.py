@@ -48,25 +48,29 @@ class Visual:
         take_screenshot:
         visual_process:
     '''
-    def __init__(self, queue, pipe_in, pipe_out, lock):
+    def __init__(self, queue, pipe_in, pipe_out, lock, mode='spiral'):
+        self.mode = mode
         self.monitor = Monitor(MONITOR, currentCalib={'sizePix':SIZE,
                                                       'width': WIDTH,
                                                       'distance':DISTANCE})
-        self.display = Window(size=SIZE, monitor=self.monitor, units=SCREEN_UNITS,
+        self.display = Window(size=SIZE, monitor=self.monitor, units=SCREEN_UNITS[self.mode],
                               color=BACKCOL, screen=MONITOR_N, fullscr=True)
         self.mouse = Mouse()
         self.fixation_mark = Circle(self.display, radius=0.05 ,edges=32,
                                     pos=CENTER, lineColor=FIXCOL)
-        self.photosensor_stim = Rect(self.display, size = (5.5,5.5), fillColor = FIXCOL,
-                                     lineWidth = 0, pos = PHOTOSENSOR_POS)
+        self.photosensor_stim = Rect(self.display, size = (5.5,5.5), fillColor = FIXCOL, # TODO: size for square mode
+                                     lineWidth = 0, pos = PHOTOSENSOR_POS[self.mode])
         self.pause_mark = TextStim(self.display, text='PAUSE', pos=PAUSE_POS,
-                                   units=SCREEN_UNITS, height=STIM_SIZE[1])
+                                   units=SCREEN_UNITS[self.mode], height=STIM_SIZE[1])
         self.LSL = self.create_lsl_outlet()
         self.lock = lock
         self.queue = queue
         self.pipe_in = pipe_in
         self.pipe_out = pipe_out
-        self.groups = merge_two_dicts(GROUP1, GROUP2)
+        if self.mode == 'spiral':
+            self.groups = merge_two_dicts(GROUP1, GROUP2)
+        else:
+            self.groups = merge_two_dicts(ROWS, COLS)
 
         wait(5) # Preventing the psychopy window from opening too early
 
@@ -85,7 +89,7 @@ class Visual:
         return outlet
     
     def visual_environment(self, flash_group=(), state=""):
-        '''Draw the visual environment.
+        '''Draw the visual environment (GUI).
         
         Keyword arguments:
         flash group -- tuple with coordinates of stimuli
@@ -94,32 +98,33 @@ class Visual:
 
         '''
         # Loop over all stimuli positions
-        for position in STIM_POS:
+        for position in STIM_POS[self.mode]:
 
             # Extracting indeces and proper size for each stimulus 
             index, stim_size = self.get_stim_size(position)
 
             # Draw stimulus
             stim = TextStim(self.display, text=STIM_NAMES[index], pos=position,
-                            units=SCREEN_UNITS, height=stim_size, opacity=0.5)
+                            units=SCREEN_UNITS[self.mode], height=stim_size, opacity=0.5)
             
             # Make target stimuli flash
             if state == 'flash':
                 if index in flash_group:
                     stim = TextStim(self.display, text=STIM_NAMES[index], pos=position,
-                                    units=SCREEN_UNITS, height=stim_size, opacity=1)
+                                    units=SCREEN_UNITS[self.mode], height=stim_size, opacity=1)
                     self.photosensor_stim.draw()
 
             # Mark target stimulus
             if state == 'que':
                 if index == flash_group:
                     stim = TextStim(self.display, text=STIM_NAMES[index], pos=position,
-                                    units=SCREEN_UNITS, height=stim_size, opacity=1, color=QUECOL)
+                                    units=SCREEN_UNITS[self.mode], height=stim_size, opacity=1, color=QUECOL)
             
             stim.draw()
             
         # Drawing other stimuli
-        self.fixation_mark.draw()
+        if self.mode == 'spiral':
+            self.fixation_mark.draw()
         # Pause screen
         if state == 'pause':
             self.pause_mark.draw()
@@ -137,16 +142,18 @@ class Visual:
         index -- index of a stimulus in STIM_NAMES (see CONSTANTS) 
         
         '''
-        index = STIM_POS.index(position)
-        group_size = len(STIM_POS)/len(STIM_SIZE)
+        index = STIM_POS[self.mode].index(position)
+        if self.mode == 'spiral':
+            group_size = len(STIM_POS[self.mode])/len(STIM_SIZE)
 
-        if index+1 <= group_size:
-            stim_size = STIM_SIZE[0] 
-        elif group_size < index+1 <= 2*group_size:
-            stim_size = STIM_SIZE[1]
-        else: 
-            stim_size = STIM_SIZE[2]
-        
+            if index+1 <= group_size:
+                stim_size = STIM_SIZE[0] 
+            elif group_size < index+1 <= 2*group_size:
+                stim_size = STIM_SIZE[1]
+            else: 
+                stim_size = STIM_SIZE[2]
+        else:
+            stim_size = 75
         return(index, stim_size)
     
     def visual_stimulation(self, flash_group, group_number):
@@ -219,7 +226,7 @@ class Visual:
         # Draw pause screen
         self.visual_environment(state='pause')
         # Wait until user release pause
-        waitKeys(maxWait=30, keyList=['space'])
+        waitKeys(maxWait=60, keyList=['space'])
         clearEvents()
         # Track pause end in logging and send marker
         logging.info('Continue stimulation...')
@@ -296,3 +303,4 @@ if __name__ == '__main__':
     lock = multiprocessing.Lock()
     a=Visual(queue, pipe_in, pipe_out, lock)
     a.visual_process(sequence=['B'], lockable = False)
+    

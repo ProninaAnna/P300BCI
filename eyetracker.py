@@ -293,12 +293,12 @@ class Eyetracker:
                     self.send_message('{}, {}.jgp'.format(sample, timestamp))
             # Stop recording and save data
             self.stop_record()
-            self.save_data('eye_data')
+            self.save_data('{}'.format(FILECODE))
             self.disconnect()
         finally:
             pass
 
-        self.pipe_in.send(int(1)) # If need to skip eyetracking and just record eeg
+        # self.pipe_in.send(int(1)) # If need to skip eyetracking and just record eeg
     
         
 if __name__ == '__main__':
