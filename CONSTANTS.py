@@ -1,92 +1,68 @@
-# =================
-# === STREAMING ===
-# =================
+'''
+List of available constants to setup and customize P300 BCI
+'''
 
-EEG_STREAM = 'NVX52_Data' # name of EEG data stream 
-PHOTOSENSOR_STREAM = 'NVX52_Events' # name of photosensor data stream
-MESSAGE_STREAM = 'Messages'
+import os
 
-# ===========
-# == DATA ===
-# ===========
+EEG_STREAM = 'NVX52_Data' # name of the EEG data stream 
+PHOTOSENSOR_STREAM = 'NVX52_Events' # name of the photosensor data stream
+VISUAL_STREAM = 'VisualProcessMarkerStream'
+TRIAL_START = 777 # start marker for LSL
+TRIAL_END= 888 # stop marker for LSL
+WORD_START=444
+WORD_END=555
+PAUSE_START=111
+PAUSE_END=222
 
-FILEPATH = r'C:\\Users\\apron\\Documents\\Google Диск\\PROJECTS\\ind-bci\\BCI\\'
+IP_IVIEWX = '192.168.2.43' # static IP of the iViewX laptop
+IP_STIM = '192.168.2.173' # static IP of the stimulus PC
 
-# ===============
-# === VISUALS ===
-# ===============
+MONITOR = 'Dell' # monitor name
+MONITOR_N = 2
+SIZE = (1680, 1050) # screen resolution (2560, 1440), px 
+WIDTH = 47.5 # monitor screen width, 59.5 cm 
+DISTANCE = 56 # distance between subject and screen, cm 
 
-DIR = r'C:\Users\apron\Documents\GitHub\Gaze-Independent-Speller' #os.getcwd() 
+SCREEN_UNITS = {'spiral':'deg',
+                'square':'pix'} # coordinates units 
+CENTER = (0,0) # fixation mark coordinates
+PHOTOSENSOR_POS = {'spiral':(25.5, 14.4),
+                    'square':(1600, 1000)} # photosensor stimulus coordinates
+PAUSE_POS = (-20.0, 14.4) # pause mark coordinates
+STIM_NAMES = [item for item in u'qwertyuiopasdfghjklzxcvbnm_1234567890!?.,;:"()+=-~[]\/'.upper()] # available stimuli names, unicode
+GROUP1 = {0:(0, 11, 21), 1:(1, 12, 22), 2:(2, 13, 23), 3:(3, 14, 24), 4:(4, 15, 25), 5:(5, 16, 26), 6:(6, 17, 18), 7:(7, 9, 19), 8:(8, 10, 20)} # groups of stims ("rows and colums")
+GROUP2 = {9:(0, 17, 24), 10:(1, 9, 25), 11:(2, 10, 26), 12:(3, 11, 18), 13:(4, 12, 19), 14:(5, 13, 20), 15:(6, 14, 21), 16:(7, 15, 22), 17:(8, 16, 23)}
+ROWS = {0:(0, 1, 2, 3, 4, 5), 1:(6, 7, 8, 9, 10, 11), 2:(12, 13, 14,15, 16, 17), 3:(18, 19, 20, 21, 22, 23), 4:(24, 25, 26, 27, 28, 29), 5:(30, 31, 32, 33, 34, 35)} # literraly rows
+COLS = {6:(0, 6, 12, 18, 24, 30), 7:(1, 7, 13, 19, 25, 31), 8:(2, 8, 14, 20, 26, 32), 9:(3, 9, 15, 21, 27, 33), 10:(4, 10, 16, 22, 28, 34), 11:(5, 11, 17, 23, 29, 35)} # literraly colums
+STIM_SIZE = (5.5, 3.5, 1.5) # stimuli sizes
+STIM_POS = {'spiral': [(0,-12.000), (-7.713,-9.193), (-11.818,-2.084), 
+                       (-10.392,6.000), (-4.104,11.276), (4.104,11.276), 
+                       (10.392,6.000), (11.818,-2.084), (7.713,-9.193),
+                       (0,7.000), (4.500,5.362), (6.894,1.216), 
+                       (6.062,-3.500), (2.394,-6.578), (-2.394,-6.578), 
+                       (-6.062,-3.500), (-6.894,1.216), (-4.500,5.362),
+                       (0,-3.500), (-2.250,-2.681), (-3.447,-0.608), 
+                       (-3.031,1.750), (-1.197,3.289), (1.197,3.289), 
+                       (3.031,1.750), (3.447,-0.608), (2.250,-2.681)],
+            'square': [(-250, 250), (-150, 250), (-50, 250), (50, 250), (150, 250), (250, 250),
+                      (-250, 150), (-150, 150), (-50, 150), (50, 150), (150, 150), (250, 150),
+                      (-250, 50), (-150, 50), (-50, 50), (50, 50), (150, 50), (250, 50),
+                      (-250, -50), (-150, -50), (-50, -50), (50, -50), (150, -50), (250, -50),
+                      (-250, -150), (-150, -150), (-50, -150), (50, -150), (150, -150), (250, -150),
+                      (-250, -250), (-150, -250), (-50, -250), (50, -250), (150, -250), (250, -250)]} # stimuli positions coordinates
 
-BACKCOL=(-0.5,-0.5,-0.5) #background color
-FIXCOL=(1,1,1) #fixation mark color
 
-C1=[(0,-1.500), (-0.964,-1.149), (-1.477,-0.260), (-1.299,0.750), (-0.513,1.410), 
-    (0.513,1.410), (1.299,0.750), (1.477,-0.260), (0.964,-1.149)] # coordinates of inner circle, deg
-C2=[(0,3.500),(2.250,2.681),(3.447,0.608),(3.031,-1.750),(1.197,-3.289),
-    (-1.197,-3.289),(-3.031,-1.750),(-3.447,0.608),(-2.250,2.681)] # coordinates of middle circle, deg
-C3=[(0,-7.000), (-4.500,-5.362), (-6.894,-1.216), (-6.062,3.500), (-2.394,6.578),
-    (2.394,6.578), (6.062,3.500), (6.894,-1.216), (4.500,-5.362)] # coordinates of outer circle, deg
+FLASH = 0.025 # flashing time, s
+ISI = 0.075 # inter stimulus interval, s
+TRIAL_LEN = 10 # number of flashes in one trial
 
-BLOCK1=['D', 'K', 'O', 'Y', 'N', 'L', '*', 'H', 'P']
-BLOCK2=['E', 'F', 'X', 'A', 'M', 'J', 'I', 'W', 'U']
-BLOCK3=['S', 'B', 'Z', 'T', 'R', 'V', 'C', 'Q', 'G']
-
-STIM = 0.050 # duration of stimulus (flash), s
-ISI = 0.100 # duration of inter-stimulus interval, s
-TRIALREPEATS = 20 # cycles of stimulation
-TRIALNUMBER = 20 # number of trials 
-SIZE = (1920, 1080) #(1680,1050) monitor resolution 
-CENTER = (0,0) # fixation mark coordinates, deg
-DISTANCE = 75 # distance between subject and screen, cm
-WIDTH = 47.4 # screen width , cm (31)
-LETTERSIZE = [0.8, 1.85, 3.3] # size of letter images, deg
-BACKCOL=(-0.5,-0.5,-0.5) # background color
+BACKCOL=(-1,-1,-1) # background color
 FIXCOL=(1,1,1) # fixation mark color
+STIMCOL=(1,1,1) # stimuli color
+QUECOL=(1.0,-1,-1) # que color
 
-CIRCLES={'J':[C1[0], (DIR+r'\Stimuli\10-0.png'), (DIR+r'\Stimuli\10-1.png'), LETTERSIZE[0]], 
-              'V':[C1[1], (DIR+r'\Stimuli\22-0.png'), (DIR+r'\Stimuli\22-1.png'), LETTERSIZE[0]], 
-              'P':[C1[2], (DIR+r'\Stimuli\16-0.png'), (DIR+r'\Stimuli\16-1.png'), LETTERSIZE[0]], 
-              'U':[C1[3], (DIR+r'\Stimuli\21-0.png'), (DIR+r'\Stimuli\21-1.png'), LETTERSIZE[0]], 
-              'G':[C1[4], (DIR+r'\Stimuli\7-0.png'), (DIR+r'\Stimuli\7-1.png'), LETTERSIZE[0]], 
-              'Y':[C1[5], (DIR+r'\Stimuli\25-0.png'), (DIR+r'\Stimuli\25-1.png'), LETTERSIZE[0]],
-              'X':[C1[6], (DIR+r'\Stimuli\24-0.png'), (DIR+r'\Stimuli\24-1.png'), LETTERSIZE[0]], 
-              'Z':[C1[7], (DIR+r'\Stimuli\26-0.png'), (DIR+r'\Stimuli\26-1.png'), LETTERSIZE[0]], 
-              '*':[C1[8], (DIR+r'\Stimuli\27-0.png'), (DIR+r'\Stimuli\27-1.png'), LETTERSIZE[0]],
-              'F':[C2[0], (DIR+r'\Stimuli\6-0.png'), (DIR+r'\Stimuli\6-1.png'), LETTERSIZE[1]], 
-              'B':[C2[1], (DIR+r'\Stimuli\2-0.png'), (DIR+r'\Stimuli\2-1.png'), LETTERSIZE[1]], 
-              'N':[C2[2], (DIR+r'\Stimuli\14-0.png'), (DIR+r'\Stimuli\14-1.png'), LETTERSIZE[1]], 
-              'M':[C2[3], (DIR+r'\Stimuli\13-0.png'), (DIR+r'\Stimuli\13-1.png'), LETTERSIZE[1]], 
-              'R':[C2[4], (DIR+r'\Stimuli\18-0.png'), (DIR+r'\Stimuli\18-1.png'), LETTERSIZE[1]], 
-              'H':[C2[5], (DIR+r'\Stimuli\8-0.png'), (DIR+r'\Stimuli\8-1.png'), LETTERSIZE[1]], 
-              'W':[C2[6], (DIR+r'\Stimuli\23-0.png'), (DIR+r'\Stimuli\23-1.png'), LETTERSIZE[1]],
-              'Q':[C2[7], (DIR+r'\Stimuli\17-0.png'), (DIR+r'\Stimuli\17-1.png'), LETTERSIZE[1]], 
-              'K':[C2[8], (DIR+r'\Stimuli\11-0.png'), (DIR+r'\Stimuli\11-1.png'), LETTERSIZE[1]],
-              'I':[C3[0], (DIR+r'\Stimuli\9-0.png'), (DIR+r'\Stimuli\9-1.png'), LETTERSIZE[2]], 
-              'C':[C3[1], (DIR+r'\Stimuli\3-0.png'), (DIR+r'\Stimuli\3-1.png'), LETTERSIZE[2]], 
-              'D':[C3[2], (DIR+r'\Stimuli\4-0.png'), (DIR+r'\Stimuli\4-1.png'), LETTERSIZE[2]], 
-              'E':[C3[3], (DIR+r'\Stimuli\5-0.png'), (DIR+r'\Stimuli\5-1.png'), LETTERSIZE[2]], 
-              'S':[C3[4], (DIR+r'\Stimuli\19-0.png'), (DIR+r'\Stimuli\19-1.png'), LETTERSIZE[2]], 
-              'O':[C3[5], (DIR+r'\Stimuli\15-0.png'), (DIR+r'\Stimuli\15-1.png'), LETTERSIZE[2]], 
-              'A':[C3[6], (DIR+r'\Stimuli\1-0.png'), (DIR+r'\Stimuli\1-1.png'), LETTERSIZE[2]], 
-              'T':[C3[7], (DIR+r'\Stimuli\20-0.png'), (DIR+r'\Stimuli\20-1.png'), LETTERSIZE[2]],
-              'L':[C3[8], (DIR+r'\Stimuli\12-0.png'), (DIR+r'\Stimuli\12-1.png'), LETTERSIZE[2]]}
-
-# ================
-# === MESSAGES ===
-# ================
-
-EXP_START = 666 # Message to be sent to log with the start of experiment
-EXP_END = 999 # End of experiment
-TRIAL_START = 777 # Start of the new trial
-LEARN_END = 888999 # End of learning session
-#PLAY_START = 999888 # Start of spelling session
-
-## ===================
-## === EYETRACKING ===
-## ===================
-#
-#SMI_HOST_IP = '192.168.0.2' # IP of the machine running the experiment
-#HOST_PORT = 4444
-#SMI_SERVER_IP = '192.168.0.3' # IP of SMI RED 500 Eyetracker Server
-#SERVER_PORT = 5555
+FILEPATH = os.path.dirname(os.path.realpath(__file__))+'\\logs'
+if not os.path.exists(FILEPATH):
+    os.mkdir(FILEPATH)
+    
+FILECODE = 'ds_o' # Code of test subject - [initials]_[c]overt/[o]vert
